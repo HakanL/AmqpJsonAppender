@@ -390,12 +390,35 @@ namespace Haukcode.AmqpJsonAppender
         {
             if (string.IsNullOrEmpty(value) || value == "(null)")
                 return;
-            value = value.Replace("\\", "\\\\")
-                .Replace("\"", "\\\"")
-                .Replace("\n", "\\n")
-                .Replace("\r", "\\r")
-                .Replace("\t", "\\t");
-            sb.AppendFormat("\"{0}\":\"{1}\",", key.ToLower(), value);
+
+            StringBuilder stripped = new StringBuilder();
+            foreach (char ch in value)
+            {
+                switch (ch)
+                {
+                    case '\\':
+                        stripped.Append("\\\\");
+                        break;
+                    case '"':
+                        stripped.Append("\\\"");
+                        break;
+                    case '\n':
+                        stripped.Append("\\n");
+                        break;
+                    case '\r':
+                        stripped.Append("\\r");
+                        break;
+                    case '\t':
+                        stripped.Append("  ");
+                        break;
+                    default:
+                        if (ch >= ' ')
+                            stripped.Append(ch);
+                        break;
+                }
+            }
+
+            sb.AppendFormat("\"{0}\":\"{1}\",", key.ToLower(), stripped.ToString());
         }
 
         public string GetJSON()
