@@ -73,6 +73,7 @@ namespace Haukcode.AmqpJsonAppender
         public string AmqpQueue { get; set; }
         public bool StripEmptyMessages { get; set; }
         public int BufferSize { get; set; }
+        public string IndexId { get; set; }
 
 
         public AmqpJsonAppender()
@@ -94,6 +95,7 @@ namespace Haukcode.AmqpJsonAppender
             AmqpPassword = "guest";
             AmqpVirtualHost = "/";
             AmqpQueue = "elasticsearch";
+            IndexId = "logs-{0:yyyy}.{1}";
 
             BufferSize = 500;
 
@@ -302,6 +304,10 @@ namespace Haukcode.AmqpJsonAppender
                 Sequence = sequence
             };
 
+            var dateInfo = System.Globalization.DateTimeFormatInfo.CurrentInfo;
+            jsonMessage.Index = string.Format(IndexId, jsonMessage.Timestamp,
+                dateInfo.Calendar.GetWeekOfYear(jsonMessage.Timestamp, dateInfo.CalendarWeekRule, dateInfo.FirstDayOfWeek));
+
             //only set location information if configured
             if (IncludeLocationInformation)
             {
@@ -367,6 +373,8 @@ namespace Haukcode.AmqpJsonAppender
 
         public string Line { get; set; }
 
+        public string Index { get; set; }
+
         public DateTime Timestamp { get; set; }
 
         public long Sequence { get; set; }
@@ -423,12 +431,11 @@ namespace Haukcode.AmqpJsonAppender
 
         public string GetJSON()
         {
-            string index = string.Format("logs-{0:yyyy.MM.dd}", Timestamp);
             string type = "log4net";
 
             var sb = new StringBuilder();
             sb.Append("{\"create\":{");
-            sb.AppendFormat("\"_index\":\"{0}\"", index);
+            sb.AppendFormat("\"_index\":\"{0}\"", Index);
             sb.AppendFormat(",\"_type\":\"{0}\"", type);
             sb.AppendLine("}}");
 
