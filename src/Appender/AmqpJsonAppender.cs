@@ -416,6 +416,9 @@ namespace Haukcode.AmqpJsonAppender
                     case '\r':
                         stripped.Append("\\r");
                         break;
+                    case '¤':
+                        stripped.Append("$");
+                        break;
                     case '\t':
                         stripped.Append("  ");
                         break;
